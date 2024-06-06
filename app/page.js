@@ -1,11 +1,22 @@
 'use client';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import TaskList from './components/TaskList';
 
 export default function Home() {
 	const [taskText, setTaskText] = useState('');
 	const [tasks, setTasks] = useState([]);
 	const [filter, setFilter] = useState('all');
+
+	useEffect(() => {
+		const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+		setTasks(savedTasks);
+	}, []);
+
+	useEffect(() => {
+		if (tasks.length > 0) {
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+		}
+	}, [tasks]);
 
 	const handleOnChange = taskText => {
 		setTaskText(taskText);
@@ -39,13 +50,6 @@ export default function Home() {
 		setFilter(filter);
 	};
 
-	const filteredTasks = tasks.filter(task => {
-		if (filter === 'all') return true;
-		if (filter === 'active') return !task.completed;
-		if (filter === 'completed') return task.completed;
-		return true;
-	});
-
 	const inCompleteTaskCount = tasks.filter(task => !task.completed).length;
 
 	return (
@@ -71,50 +75,12 @@ export default function Home() {
 				</button>
 			</div>
 			<div className='bg-gray-800 rounded p-4'>
-				<ul>
-					{filteredTasks.map(task => {
-						return (
-							<li
-								key={task.id}
-								className='flex justify-between items-center p-2 bg-gray-900 rounded mb-2'
-							>
-								<div className='flex items-center'>
-									<button
-										className='w-6 h-6 my-auto mr-6'
-										onClick={() => handleToggleTask(task.id)}
-									>
-										<Image
-											src={task.completed ? './check_circle.svg' : './circle.svg'}
-											alt='Task status'
-											width={30}
-											height={30}
-										/>
-									</button>
-									<span className={`ml-2 ${task.completed ? 'line-through text-gray-500' : 'text-white'}`}>{task.text}</span>
-								</div>
-								<button
-									onClick={() => handleDeleteTask(task.id)}
-									className='text-gray-400 hover:text-white'
-								>
-									<svg
-										xmlns='http://www.w3.org/2000/svg'
-										className='h-6 w-6'
-										fill='none'
-										viewBox='0 0 24 24'
-										stroke='currentColor'
-									>
-										<path
-											strokeLinecap='round'
-											strokeLinejoin='round'
-											strokeWidth='2'
-											d='M6 18L18 6M6 6l12 12'
-										/>
-									</svg>
-								</button>
-							</li>
-						);
-					})}
-				</ul>
+				<TaskList
+					tasks={tasks}
+					filter={filter}
+					handleToggleTask={handleToggleTask}
+					handleDeleteTask={handleDeleteTask}
+				/>
 				<div className='mt-4 flex justify-between items-center text-sm text-gray-400'>
 					<span> {inCompleteTaskCount} items left</span>
 					<div>
