@@ -16,6 +16,7 @@ const TaskList = ({ tasks, filter, handleToggleTask, handleDeleteTask }) => {
 				{filteredTasks.map(task => {
 					return (
 						<TaskItem
+							key={task.id}
 							task={task}
 							handleToggleTask={handleToggleTask}
 							handleDeleteTask={handleDeleteTask}
